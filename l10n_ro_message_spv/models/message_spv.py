@@ -398,7 +398,7 @@ class MessageSPV(models.Model):
             if not message.attachment_xml_id:
                 message.get_xml_fom_zip()
 
-            xml_file = message.attachment_xml_id.raw
+            xml_file = message.attachment_xml_id.sudo().raw
             headers = {"Content-Type": "text/plain"}
             xml = xml_file
             val1 = "FACT1"
@@ -432,7 +432,7 @@ class MessageSPV(models.Model):
                 )
                 if message.attachment_anaf_pdf_id:
                     message.attachment_anaf_pdf_id.sudo().unlink()
-                message.write({"attachment_anaf_pdf_id": attachment_pdf.id})
+                message.sudo().write({"attachment_anaf_pdf_id": attachment_pdf.id})
 
     def get_embedded_pdf(self):
         for message in self:
