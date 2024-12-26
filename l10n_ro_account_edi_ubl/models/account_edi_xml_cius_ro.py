@@ -139,7 +139,6 @@ class AccountEdiXmlCIUSRO(models.Model):
         vals_list["vals"][
             "customization_id"
         ] = "urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1"
-        index = 1
         vals_list["main_template"] = "account_edi_ubl_cii.ubl_20_Invoice"
         point_of_sale = (
             self.env["ir.module.module"]
