@@ -263,7 +263,7 @@ class AccountEdiXmlCIUSRO(models.Model):
             if invoice.pos_order_ids:
                 vals["vals"]["invoice_type_code"] = 751
         result_list = []
-        if vals_list["vals"].get("note_vals"):
+        if vals["vals"].get("note_vals"):
             if len(vals["vals"]["note_vals"][0]) > 100:
                 split_strings = self.split_string(vals["vals"]["note_vals"][0])
                 for _index, split_str in enumerate(split_strings):
