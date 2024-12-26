@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<Invoice
+<CreditNote
     xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
     xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
@@ -143,4 +143,4 @@
             <cbc:BaseQuantity unitCode="C62">1.0</cbc:BaseQuantity>
         </cac:Price>
     </cac:CreditNoteLine>
-</Invoice>
+</CreditNote>

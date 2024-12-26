@@ -240,17 +240,17 @@ class AccountEdiXmlCIUSRO(models.Model):
             invoice.journal_id.type == "sale"
             and invoice.journal_id.l10n_ro_sequence_type == "autoinv1"
         ):
-            if invoice.move_type == "in_invoice":
+            if invoice.move_type == "out_invoice":
                 vals["vals"]["invoice_type_code"] = 389
-            elif invoice.move_type == "in_refund":
+            elif invoice.move_type == "out_refund":
                 vals["vals"]["credit_note_type_code"] = 389
         if invoice.journal_id.l10n_ro_sequence_type == "autoinv2":
             if invoice.move_type == "in_invoice":
                 vals["main_template"] = "account_edi_ubl_cii.ubl_20_Invoice"
-                vals["vals"]["invoice_type_code"] = 380
+                vals["vals"]["invoice_type_code"] = 389
             elif invoice.move_type == "in_refund":
                 vals["main_template"] = "account_edi_ubl_cii.ubl_20_CreditNote"
-                vals["vals"]["credit_note_type_code"] = 381
+                vals["vals"]["credit_note_type_code"] = 389
         point_of_sale = (
             self.env["ir.module.module"]
             .sudo()
@@ -273,7 +273,6 @@ class AccountEdiXmlCIUSRO(models.Model):
 
         vals = self._export_vals_einvoice_autoinvoice(invoice, vals)
         vals = self._export_vals_einvoice_partner_vat_subjected(invoice, vals)
-
         return vals
 
     def _export_invoice_constraints(self, invoice, vals):
