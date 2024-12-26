@@ -69,11 +69,6 @@ class AccountEdiXmlCIUSRO(models.Model):
 
     def _get_invoice_tax_totals_vals_list(self, invoice, taxes_vals):
         balance_sign = -1 if invoice.is_inbound() else 1
-        if (
-            invoice.move_type == "out_refund"
-            and invoice.company_id.l10n_ro_credit_note_einvoice
-        ):
-            balance_sign = -balance_sign
         return [
             {
                 "currency": invoice.currency_id,
@@ -115,24 +110,6 @@ class AccountEdiXmlCIUSRO(models.Model):
             ]
         return res
 
-    def _get_invoice_line_vals(self, line, taxes_vals):
-        res = super()._get_invoice_line_vals(line, taxes_vals)
-        if (
-            line.move_id.move_type == "out_refund"
-            and line.company_id.l10n_ro_credit_note_einvoice
-        ):
-            if res.get("invoiced_quantity", 0):
-                res["invoiced_quantity"] = (-1) * res["invoiced_quantity"]
-            if res.get("line_extension_amount", 0):
-                res["line_extension_amount"] = (-1) * res["line_extension_amount"]
-            if res.get("tax_total_vals"):
-                for tax in res["tax_total_vals"]:
-                    if tax["tax_amount"]:
-                        tax["tax_amount"] = (-1) * tax["tax_amount"]
-                    if tax["taxable_amount"]:
-                        tax["taxable_amount"] = (-1) * tax["taxable_amount"]
-        return res
-
     def _get_invoice_line_item_vals(self, line, taxes_vals):
         vals = super()._get_invoice_line_item_vals(line, taxes_vals)
         vals["description"] = vals["description"][:200]
@@ -164,7 +141,6 @@ class AccountEdiXmlCIUSRO(models.Model):
         ] = "urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1"
         index = 1
         vals_list["main_template"] = "account_edi_ubl_cii.ubl_20_Invoice"
-        vals_list["vals"]["invoice_type_code"] = 380
         point_of_sale = (
             self.env["ir.module.module"]
             .sudo()
@@ -175,32 +151,6 @@ class AccountEdiXmlCIUSRO(models.Model):
         if point_of_sale:
             if invoice.pos_order_ids:
                 vals_list["vals"]["invoice_type_code"] = 751
-        if vals_list["vals"].get("credit_note_type_code"):
-            vals_list["vals"].pop("credit_note_type_code")
-        for val in vals_list["vals"]["invoice_line_vals"]:
-            val["id"] = index
-            index += 1
-        if (
-            invoice.move_type == "out_refund"
-            and invoice.company_id.l10n_ro_credit_note_einvoice
-        ):
-            if vals_list["vals"].get("legal_monetary_total_vals"):
-                vals_list["vals"]["legal_monetary_total_vals"][
-                    "tax_exclusive_amount"
-                ] = (-1) * vals_list["vals"]["legal_monetary_total_vals"][
-                    "tax_exclusive_amount"
-                ]
-                vals_list["vals"]["legal_monetary_total_vals"][
-                    "tax_inclusive_amount"
-                ] = (-1) * vals_list["vals"]["legal_monetary_total_vals"][
-                    "tax_inclusive_amount"
-                ]
-                vals_list["vals"]["legal_monetary_total_vals"]["prepaid_amount"] = (
-                    -1
-                ) * vals_list["vals"]["legal_monetary_total_vals"]["prepaid_amount"]
-                vals_list["vals"]["legal_monetary_total_vals"]["payable_amount"] = (
-                    -1
-                ) * vals_list["vals"]["legal_monetary_total_vals"]["payable_amount"]
         return vals_list
 
     def _export_invoice_constraints(self, invoice, vals):
