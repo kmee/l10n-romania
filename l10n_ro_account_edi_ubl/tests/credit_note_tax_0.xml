@@ -123,7 +123,7 @@
     </cac:CreditNoteLine>
     <cac:CreditNoteLine>
         <cbc:ID>2</cbc:ID>
-        <cbc:CreditedQuantity unitCode="C62">5.0</cbc:InvoicedQuantity>
+        <cbc:CreditedQuantity unitCode="C62">5.0</cbc:CreditedQuantity>
         <cbc:LineExtensionAmount currencyID="RON">5000.00</cbc:LineExtensionAmount>
         <cac:Item>
             <cbc:Description>[00000624] Bec P21/10W</cbc:Description>
