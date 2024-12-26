@@ -81,12 +81,6 @@ class AccountEdiXmlCIUSRO(models.Model):
 
     def _get_invoice_tax_totals_vals_list(self, invoice, taxes_vals):
         balance_sign = -1 if invoice.is_inbound() else 1
-        if (
-            invoice.move_type in ["out_refund", "in_refund"]
-            and invoice.company_id.l10n_ro_credit_note_einvoice
-        ):
-            balance_sign = -balance_sign
-
         return [
             {
                 "currency": invoice.currency_id,
@@ -136,20 +130,6 @@ class AccountEdiXmlCIUSRO(models.Model):
                 res["line_extension_amount"] = (
                     discount_amount + res["line_extension_amount"]
                 )
-        if (
-            line.move_id.move_type in ["out_refund", "in_refund"]
-            and line.company_id.l10n_ro_credit_note_einvoice
-        ):
-            if res.get("invoiced_quantity", 0):
-                res["invoiced_quantity"] = (-1) * res["invoiced_quantity"]
-            if res.get("line_extension_amount", 0):
-                res["line_extension_amount"] = (-1) * res["line_extension_amount"]
-            if res.get("tax_total_vals"):
-                for tax in res["tax_total_vals"]:
-                    if tax["tax_amount"]:
-                        tax["tax_amount"] = (-1) * tax["tax_amount"]
-                    if tax["taxable_amount"]:
-                        tax["taxable_amount"] = (-1) * tax["taxable_amount"]
         return res
 
     def _get_invoice_line_item_vals(self, line, taxes_vals):
@@ -176,30 +156,6 @@ class AccountEdiXmlCIUSRO(models.Model):
 
     def split_string(self, string):
         return [string[i : i + 100] for i in range(0, len(string), 100)]
-
-    def _export_vals_einvoice_options(self, invoice, vals_list):
-        if (
-            invoice.move_type in ["out_refund", "in_refund"]
-            and invoice.company_id.l10n_ro_credit_note_einvoice
-        ):
-            if vals_list["vals"].get("legal_monetary_total_vals"):
-                vals_list["vals"]["legal_monetary_total_vals"][
-                    "tax_exclusive_amount"
-                ] = (-1) * vals_list["vals"]["legal_monetary_total_vals"][
-                    "tax_exclusive_amount"
-                ]
-                vals_list["vals"]["legal_monetary_total_vals"][
-                    "tax_inclusive_amount"
-                ] = (-1) * vals_list["vals"]["legal_monetary_total_vals"][
-                    "tax_inclusive_amount"
-                ]
-                vals_list["vals"]["legal_monetary_total_vals"]["prepaid_amount"] = (
-                    -1
-                ) * vals_list["vals"]["legal_monetary_total_vals"]["prepaid_amount"]
-                vals_list["vals"]["legal_monetary_total_vals"]["payable_amount"] = (
-                    -1
-                ) * vals_list["vals"]["legal_monetary_total_vals"]["payable_amount"]
-        return vals_list
 
     def _export_vals_einvoice_autoinvoice(self, invoice, vals_list):
         if (
@@ -321,7 +277,6 @@ class AccountEdiXmlCIUSRO(models.Model):
         if result_list:
             vals_list["vals"]["note_vals"] = result_list
 
-        vals_list = self._export_vals_einvoice_options(invoice, vals_list)
         vals_list = self._export_vals_einvoice_autoinvoice(invoice, vals_list)
         vals_list = self._export_vals_einvoice_partner_vat_subjected(invoice, vals_list)
 
@@ -615,12 +570,6 @@ class AccountEdiXmlCIUSRO(models.Model):
                 grouping_key["tax_name"] = tax.name
             return grouping_key
 
-        balance_sign = (
-            -1
-            if invoice.company_id.l10n_ro_credit_note_einvoice
-            and invoice.move_type == "out_refund"
-            else 1
-        )
         taxes_vals = invoice._prepare_edi_tax_details(
             grouping_key_generator=grouping_key_generator,
             filter_to_apply=self._apply_invoice_tax_filter,
@@ -651,7 +600,7 @@ class AccountEdiXmlCIUSRO(models.Model):
                 "charge_indicator": "false",
                 "allowance_charge_reason_code": 95,
                 "allowance_charge_reason": "Scont",
-                "amount": balance_sign * round(discount_amount, 2),
+                "amount": round(discount_amount, 2),
                 "tax_category_vals": tax_category_vals,
             }
         ]
