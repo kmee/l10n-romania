@@ -18,7 +18,6 @@
         "views/account_invoice.xml",
         "views/product_view.xml",
         "views/res_partner_view.xml",
-        "views/cius_template.xml",
     ],
     "license": "AGPL-3",
     "version": "14.0.1.34.4",
