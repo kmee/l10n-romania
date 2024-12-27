@@ -36,7 +36,7 @@ class AccountEdiXmlCIUSRO(models.Model):
         # EXTENDS account.edi.xml.ubl_21
         vals = super()._get_partner_party_vals(partner, role)
         partner = partner.commercial_partner_id
-        if not partner.is_company and not partner.l10n_ro_edi_ubl_no_send_cnp:
+        if not partner.is_company and partner.l10n_ro_edi_ubl_no_send_cnp:
             vals["endpoint_id"] = "0000000000000"
         return vals
 
@@ -52,14 +52,14 @@ class AccountEdiXmlCIUSRO(models.Model):
                 and not partner.vat.upper().startswith("RO")
             ):
                 vals["tax_scheme_id"] = "!= VAT"
-            if not partner.is_company and not partner.l10n_ro_edi_ubl_no_send_cnp:
+            if not partner.is_company and partner.l10n_ro_edi_ubl_no_send_cnp:
                 vals["company_id"] = "0000000000000"
         return vals_list
 
     def _get_partner_party_legal_entity_vals_list(self, partner):
         val_list = super()._get_partner_party_legal_entity_vals_list(partner)
         partner = partner.commercial_partner_id
-        if not partner.is_company and not partner.l10n_ro_edi_ubl_no_send_cnp:
+        if not partner.is_company and partner.l10n_ro_edi_ubl_no_send_cnp:
             for vals in val_list:
                 if vals.get("commercial_partner") == partner:
                     vals["company_id"] = "0000000000000"
