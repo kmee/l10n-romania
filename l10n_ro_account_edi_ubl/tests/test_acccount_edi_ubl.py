@@ -79,14 +79,11 @@ class TestAccountEdiUbl(AccountEdiTestCommon):
                 "zip": "307175",
                 "phone": "0256413409",
                 "l10n_ro_e_invoice": True,
-                "l10n_ro_is_government_institution": False,
                 "is_company": True,
             }
         )
         if "street_name" in cls.partner._fields:
             cls.partner.write({"street_name": "Nr. 383", "street": "Foeni Nr. 383"})
-
-        cls.partner.l10n_ro_is_government_institution = True
 
         uom_id = cls.env.ref("uom.product_uom_unit").id
         cls.product_a = cls.env["product.product"].create(
@@ -464,7 +461,7 @@ class TestAccountEdiUbl(AccountEdiTestCommon):
         cius_format = self.env.ref("l10n_ro_account_edi_ubl.edi_ubl_cius_ro")
         self.assertTrue(cius_format._is_required_for_invoice(self.invoice))
         self.invoice.partner_id.is_company = False
-        self.assertFalse(cius_format._is_required_for_invoice(self.invoice))
+        self.assertTrue(cius_format._is_required_for_invoice(self.invoice))
         self.invoice.partner_id.is_company = True
         self.invoice.partner_id.country_id = False
         self.assertFalse(cius_format._is_required_for_invoice(self.invoice))
