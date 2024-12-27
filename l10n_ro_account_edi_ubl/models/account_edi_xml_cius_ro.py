@@ -32,10 +32,18 @@ class AccountEdiXmlCIUSRO(models.Model):
             vals["city_name"] = partner.city.upper().replace(" ", "")
         return vals
 
+    def _get_partner_party_vals(self, partner, role):
+        # EXTENDS account.edi.xml.ubl_21
+        vals = super()._get_partner_party_vals(partner, role)
+        partner = partner.commercial_partner_id
+        if not partner.is_company and partner.l10n_ro_edi_ubl_no_send_cnp:
+            vals["endpoint_id"] = "0000000000000"
+        return vals
+
     def _get_partner_party_tax_scheme_vals_list(self, partner, role):
         # EXTENDS account.edi.xml.ubl_21
         vals_list = super()._get_partner_party_tax_scheme_vals_list(partner, role)
-
+        partner = partner.commercial_partner_id
         for vals in vals_list:
             # /!\ For Romanian companies, the company_id can be with or without country code.
             if (
@@ -44,6 +52,19 @@ class AccountEdiXmlCIUSRO(models.Model):
                 and not partner.vat.upper().startswith("RO")
             ):
                 vals["tax_scheme_id"] = "!= VAT"
+            if not partner.is_company and partner.l10n_ro_edi_ubl_no_send_cnp:
+                vals["company_id"] = "0000000000000"
+        return vals_list
+
+    def _get_partner_party_legal_entity_vals_list(self, partner):
+        vals_list = super()._get_partner_party_legal_entity_vals_list(partner)
+        partner = partner.commercial_partner_id
+        for vals in vals_list:
+            if partner.nrc:
+                vals["company_id"] = partner.nrc
+            if not partner.is_company and partner.l10n_ro_edi_ubl_no_send_cnp:
+                if vals.get("commercial_partner") == partner:
+                    vals["company_id"] = "0000000000000"
         return vals_list
 
     def _get_tax_category_list(self, invoice, taxes):
@@ -384,11 +405,3 @@ class AccountEdiXmlCIUSRO(models.Model):
                 attachment_ids=attachments.ids
             )
         return True
-
-    def _get_partner_party_legal_entity_vals_list(self, partner):
-        vals_list = super()._get_partner_party_legal_entity_vals_list(partner)
-        commercial_partner = partner.commercial_partner_id
-        for vals in vals_list:
-            if commercial_partner.nrc:
-                vals["company_id"] = commercial_partner.nrc
-        return vals_list
