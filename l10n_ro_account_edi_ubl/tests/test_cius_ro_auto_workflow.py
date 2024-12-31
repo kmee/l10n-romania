@@ -100,7 +100,7 @@ class TestCiusRoAutoWorkflow(CiusRoTestSetup):
         self.check_invoice_documents(
             self.invoice,
             "to_send",
-            "<p>{\"The field 'VAT/Tax ID' is required on SCOALA GIMNAZIALA COMUNA FOENI.\"}</p>",
+            "<p>{\"The field 'VAT/Tax ID' is required on SCOALA GIMNAZIALA COMUNA FOENI.\"}</p>",  # noqa
             "warning",
         )
 
